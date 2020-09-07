@@ -4,7 +4,7 @@ The main goal of our app is to predict if a share value is about to increase or 
 
 ## Companies
 
-We will analyse the CAC 40 companies to analyze their shares patterns and give useful information to our application users. 
+We will analyse the Dow Jones companies to analyze their shares patterns and give useful information to our application users. 
 
 ## Remarks
 
