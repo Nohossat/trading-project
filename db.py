@@ -15,8 +15,14 @@ class Database():
             print(data)
     
     def addToCompaniesDaily(self, data):
-        query = self.connection.execute(f"""
-            INSERT INTO companies_daily(company, record_day, open_time, high, low, close_time, volume, adjusted_close, dividend_amount, split_coefficient)
-            VALUES {data}
-        """)
+        query = self.connection.execute("""
+            INSERT INTO companies_prices(symbol, record_day, open_price, high, low, close_price, volume)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, data)
+
+    def addToCompaniesInfo(self, data):
+        query = self.connection.execute("""
+            INSERT INTO companies(symbol, asset_type, official_name, company_description, exchange, currency, country, sector, industry, company_address, employees, market_cap)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, data)
         

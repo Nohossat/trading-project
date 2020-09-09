@@ -61,7 +61,7 @@ def save_time_series(symbol, results):
     None
     """
     for date, stock_info in results["Time Series (Daily)"].items():
-        data_daily = (symbol, date, float(stock_info["1. open"]), float(stock_info["2. high"]), float(stock_info["3. low"]), float(stock_info["4. close"]), float(stock_info["5. adjusted close"]), float(stock_info["6. volume"]), float(stock_info["7. dividend amount"]), float(stock_info["8. split coefficient"]))
+        data_daily = (symbol, date, float(stock_info["1. open"]), float(stock_info["2. high"]), float(stock_info["3. low"]), float(stock_info["5. adjusted close"]), float(stock_info["6. volume"]))
         db.addToCompaniesDaily(data_daily)
    
 def save_company_info(symbol, results):
@@ -76,7 +76,23 @@ def save_company_info(symbol, results):
     ===========
     None
     """
-    pass
+
+    data = (
+        symbol,
+        results["AssetType"],
+        results["Name"],
+        str(results["Description"]),
+        results["Exchange"],
+        results["Currency"],
+        results["Country"],
+        results["Sector"],
+        results["Industry"],
+        results["Address"],
+        int(results["FullTimeEmployees"]),
+        float(results["MarketCapitalization"])
+    )
+
+    db.addToCompaniesInfo(data)
 
 def get_companies_info(db, params, save_fct):
     """
@@ -114,10 +130,10 @@ def get_companies_info(db, params, save_fct):
 if __name__ == '__main__':
     db = Database()
 
-    # get stock prices time series
+    # get stock prices time series from 20 years
     params_url = {
         "function" : "TIME_SERIES_DAILY_ADJUSTED",
-        "outputsize" : "compact" 
+        "outputsize" : "full" 
     }
     get_companies_info(db, params_url, save_time_series)
 
@@ -125,6 +141,8 @@ if __name__ == '__main__':
     params_url = {
         "function" : "OVERVIEW"
     }
-    get_companies_info(db, params_url, save_company_info)
+    # get_companies_info(db, params_url, save_company_info)
+
+    # add info from financial times
     
     
