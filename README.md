@@ -10,6 +10,20 @@ We will analyse the Dow Jones companies to analyze their stock patterns and give
 
 Since we are dealing with Time Series, we will opt for a Posgresql database which will be more efficient to query and deal with the data
 
+## Install
+
+Create a **config.py** at the root of the project with the following format : 
+
+```python
+av_key = "XXXXXX"
+pghost = "localhost"
+pgdatabase = "simplon_trading"
+pguser = "XXXXXX"
+pgpwd = "XXXXXX"
+```
+
+It will be useful for the PostgreSQL database connection.
+
 ## Remarks
 
 Several questions are to be taken into account :
