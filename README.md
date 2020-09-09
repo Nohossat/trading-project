@@ -12,7 +12,16 @@ Since we are dealing with Time Series, we will opt for a Posgresql database whic
 
 ## Install
 
-Create a **config.py** at the root of the project with the following format : 
+## Database configuration
+
+Before creating the tables needed for this project, you must create a posgresql database. When it is done, you can run the following command from the root of the project : 
+
+```shell
+psql -U user -h localhost -d db_name -f script.sql
+```
+It will create all the tables necessary for the project.
+
+To connect the database to the application, create a **config.py** at the root of the project with the following format : 
 
 ```python
 av_key = "XXXXXX"
@@ -21,8 +30,6 @@ pgdatabase = "simplon_trading"
 pguser = "XXXXXX"
 pgpwd = "XXXXXX"
 ```
-
-It will be useful for the PostgreSQL database connection.
 
 ## Remarks
 

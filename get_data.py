@@ -48,7 +48,37 @@ def fetch_results(url):
     result = resp.json()
     return result
 
-def get_companies_time_series(db, params):
+def save_time_series(symbol, results):
+    """
+    Save Time Series values in the companies_daily table
+
+    Parameters
+    ===========
+    results : JSON results from API call to save to database
+
+    Return
+    ===========
+    None
+    """
+    for date, stock_info in results["Time Series (Daily)"].items():
+        data_daily = (symbol, date, float(stock_info["1. open"]), float(stock_info["2. high"]), float(stock_info["3. low"]), float(stock_info["4. close"]), float(stock_info["5. adjusted close"]), float(stock_info["6. volume"]), float(stock_info["7. dividend amount"]), float(stock_info["8. split coefficient"]))
+        db.addToCompaniesDaily(data_daily)
+   
+def save_company_info(symbol, results):
+    """
+    Save company information in the companies_info table
+
+    Parameters
+    ===========
+    results : JSON results from API call to save to database
+
+    Return
+    ===========
+    None
+    """
+    pass
+
+def get_companies_info(db, params, save_fct):
     """
     Fetch company info on Alpha Vantage
 
@@ -56,18 +86,17 @@ def get_companies_time_series(db, params):
     ===========
     db : database connection
     params : params to fetch the Alpha Vantage API
+    save_fct : this callback trigger the backup of the collected data in the correct table
 
     Return
     ===========
     None
     """
-
     # get equity symbols
     companies = json.load(open("data/dow_jones_companies.json"))
 
     # fetch results
     for symbol in companies:
-        print(symbol)
         params["symbol"] = symbol
         url = create_url(params)
         company_info = fetch_results(url)
@@ -78,22 +107,24 @@ def get_companies_time_series(db, params):
             print("idle")
             time.sleep(100)
             company_info = fetch_results(url)
-
-        # save to posgresql
-        for date, stock_info in company_info["Time Series (Daily)"].items():
-            data_daily = (symbol, date, float(stock_info["1. open"]), float(stock_info["2. high"]), float(stock_info["3. low"]), float(stock_info["4. close"]), float(stock_info["5. adjusted close"]), float(stock_info["6. volume"]), float(stock_info["7. dividend amount"]), float(stock_info["8. split coefficient"]))
-            db.addToCompaniesDaily(data_daily)
-            
-def get_companies_info():
-    pass
+        
+        save_fct(symbol, company_info)
 
 
 if __name__ == '__main__':
     db = Database()
+
+    # get stock prices time series
     params_url = {
         "function" : "TIME_SERIES_DAILY_ADJUSTED",
         "outputsize" : "compact" 
     }
-    get_companies_time_series(db, params_url)
+    get_companies_info(db, params_url, save_time_series)
+
+    # get company info + news
+    params_url = {
+        "function" : "OVERVIEW"
+    }
+    get_companies_info(db, params_url, save_company_info)
     
     
