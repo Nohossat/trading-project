@@ -1,18 +1,35 @@
 # Trading project
 
-The main goal of our app is to predict if a stock price is about to increase or decrease on the following day. 
+The main goal of our app is to predict if a stock price is about to increase or decrease on the following day. We will analyse the Dow Jones companies to analyze their stock patterns and give useful information to our application users. 
 
-## Companies
+## Stack
 
-We will analyse the Dow Jones companies to analyze their stock patterns and give useful information to our application users. 
+### Database
 
-## Database
+Since we are dealing with Time Series, we will opt for a **Posgresql** database which will be more efficient to query and deal with the data
 
-Since we are dealing with Time Series, we will opt for a Posgresql database which will be more efficient to query and deal with the data
+### Machine Learning
+
+We will use Python.
+
+### Web Framework
+
+We will use Flask to present our results and let the user interact with the predictions.
 
 ## Install
 
-## Database configuration
+### Download project
+
+```shell
+git clone https://github.com/Nohossat/trading-project.git
+cd trading-project
+python -m venv venv/
+source venv/Scripts/activate # Windows
+source venv/bin/activate # Mac
+pip install -r requirements.txt
+```
+
+### Database configuration
 
 Before creating the tables needed for this project, you must create a posgresql database. When it is done, you can run the following command from the root of the project : 
 
@@ -30,6 +47,10 @@ pgdatabase = "simplon_trading"
 pguser = "XXXXXX"
 pgpwd = "XXXXXX"
 ```
+
+### Setting up Flask
+
+TBD
 
 ## Remarks
 
