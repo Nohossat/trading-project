@@ -1,0 +1,5 @@
+av_key = "XXXXX"
+pghost = "localhost"
+pgdatabase = "simplon_trading"
+pguser = "XXXX"
+pgpwd = "XXXXX"

@@ -6,6 +6,10 @@ The main goal of our app is to predict if a stock price is about to increase or 
 
 We will analyse the Dow Jones companies to analyze their stock patterns and give useful information to our application users. 
 
+## Database
+
+Since we are dealing with Time Series, we will opt for a Posgresql database which will be more efficient to query and deal with the data
+
 ## Remarks
 
 Several questions are to be taken into account :
