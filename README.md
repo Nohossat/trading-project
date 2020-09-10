@@ -15,7 +15,9 @@ We use the **MSFT** stock to understand how to prepare the dataset for an LSTM m
 
 ### Machine Learning
 
-We compared a 1-hidden-layer LSTM and a 1-hidden-layer Bidirectional LSTM. We observe the results are slightly better with a simple LSTM so we trained and saved the simple model for each stock.
+We compared a 1-hidden-layer LSTM and a 1-hidden-layer Bidirectional LSTM. We observe the results are slightly better with a simple LSTM so we trained and saved the simple model for each stock. We only push one model (for the AAPL stock) in **models_ex**.
+
+If you want the models for all stock, you can re-run the **preparation_dataset.ipynb** file to get them.
 
 ### Web Framework
 
