@@ -15,7 +15,9 @@
         postridie disceret imperator. ideoque etiam parietes arcanorum soli conscii timebantur.</p>
     
     <h3 class="mt-large text-center"> Choose a company</h3>
-    
+    <p class="text-intro">A quondam vatibus inclitis, 
+        postridie disceret imperator. ideoque etiam parietes arcanorum soli conscii timebantur.</p>
+
     <div class="prediction_bloc">
         <div class="select_bloc">
             <select class="custom-select" id="select-stock" name="companies">
@@ -67,6 +69,7 @@
     $(function() {
       $('#select-stock').bind('change', function() {
         var symb = $( "#select-stock option:selected").val()
+        $("#result").text("")
         $.getJSON($SCRIPT_ROOT + '/_reload_time_serie', {
           symbol: symb
         }, function(data) {
@@ -80,7 +83,7 @@
 
       $('#predict-stock').bind('click', function() {
         var symb = $( "#select-stock option:selected").val()
-
+        $("#result").text("")
         $.getJSON($SCRIPT_ROOT + '/predict', {
           symbol: symb
         }, function(data) {
@@ -96,12 +99,46 @@
       var trace = {
         x: dates,
         y: prices,
+        mode: 'lines',
+        line: {
+            color: 'rgb(155, 106, 108)',
+            width: 2
+        },
         name : symbol
     };
 
       var data = [trace];
 
       var layout = {
+        title: {
+            text:'Stock Price for ' + symbol,
+            font: {
+            family: 'inherit',
+                size: 24
+            },
+            xref: 'paper',
+            x: 0.05,
+        },
+        xaxis: {
+            title: {
+                text: 'Time',
+                font: {
+                    family: 'inherit',
+                    size: 15,
+                    color: '#7f7f7f'
+                }
+            },
+        },
+        yaxis: {
+            title: {
+                text: 'Price',
+                font: {
+                    family: 'inherit',
+                    size: 15,
+                    color: '#7f7f7f'
+                }
+            }
+        },
         showlegend: true,
         legend: {
           x: 1,

@@ -1,8 +1,10 @@
 import requests
 import json
 import time
-import .config as config
-from .db import Database
+import data_wrangling.config as config
+from data_wrangling.db import Database
+from datetime import datetime, date
+import os
 
 def create_url(params):
     """
@@ -48,7 +50,7 @@ def fetch_results(url):
     result = resp.json()
     return result
 
-def save_time_series(symbol, results):
+def save_time_series(symbol, results, db):
     """
     Save Time Series values in the companies_daily table
 
@@ -63,8 +65,32 @@ def save_time_series(symbol, results):
     for date, stock_info in results["Time Series (Daily)"].items():
         data_daily = (symbol, date, float(stock_info["1. open"]), float(stock_info["2. high"]), float(stock_info["3. low"]), float(stock_info["5. adjusted close"]), float(stock_info["6. volume"]))
         db.addToCompaniesDaily(data_daily)
+
+def save_time_series_update(symbol, results, db):
+    """
+    Update Time Series values in the companies_daily table
+
+    Parameters
+    ===========
+    results : JSON results from API call to save to database
+
+    Return
+    ===========
+    None
+    """
+
+    last_record_day = db.get_last_record_day()
+    now = date.today()
+
+    for record_day, stock_info in results["Time Series (Daily)"].items():
+        date_array = record_day.split("-")
+        new_date_formatted = date(int(date_array[0]), int(date_array[1]), int(date_array[2]))
+
+        if last_record_day < new_date_formatted and new_date_formatted <= now:
+            data_daily = (symbol, record_day, float(stock_info["1. open"]), float(stock_info["2. high"]), float(stock_info["3. low"]), float(stock_info["5. adjusted close"]), float(stock_info["6. volume"]))
+            db.addToCompaniesDaily(data_daily)
    
-def save_company_info(symbol, results):
+def save_company_info(symbol, results, db):
     """
     Save company information in the companies_info table
 
@@ -109,11 +135,13 @@ def get_companies_info(db, params, save_fct):
     None
     """
     # get equity symbols
-    companies = json.load(open("data/dow_jones_companies.json"))
+    CURRENT_DIR = os.path.dirname(__file__)
+    companies_json = os.path.join(CURRENT_DIR, "data/dow_jones_companies.json")
+    companies = json.load(open(companies_json))
 
     # fetch results
     for symbol in companies:
-        params["symbol"] = symbol
+        params["symbol"] = symbol # we add the symbol to the paramaters to query the API
         url = create_url(params)
         company_info = fetch_results(url)
 
@@ -121,11 +149,10 @@ def get_companies_info(db, params, save_fct):
         warning = "Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day. Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency."
         if warning in company_info.values():
             print("idle")
-            time.sleep(100)
+            time.sleep(70)
             company_info = fetch_results(url)
         
-        save_fct(symbol, company_info)
-
+        save_fct(symbol, company_info, db)
 
 if __name__ == '__main__':
     db = Database()
@@ -143,6 +170,8 @@ if __name__ == '__main__':
     }
     get_companies_info(db, params_url, save_company_info)
 
-    # add info from financial times
+    # update prices with latest values
+
+    db.close_connection()
     
     

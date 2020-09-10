@@ -8,6 +8,13 @@ class Database():
         self.connection = self.engine.connect()
         print("DB instance created")
 
+    def get_last_record_day(self):
+        query = self.connection.execute("""
+            SELECT DISTINCT record_day FROM companies_prices 
+            ORDER BY record_day DESC LIMIT 1;
+        """)
+        return query.fetchall()[0][0]
+
     def fetchByQuery(self, query):
         fetchQuery = self.connection.execute(f"SELECT * FROM {query}")
 
