@@ -8,38 +8,41 @@
 
 {% block content %}
 
-<h1>Trading App</h1>
-<p>Et interdum acciderat, ut siquid in penetrali secreto nullo citerioris vitae ministro praesente 
-    paterfamilias uxori susurrasset in aurem, velut Amphiarao referente aut Marcio, quondam vatibus inclitis, 
-    postridie disceret imperator. ideoque etiam parietes arcanorum soli conscii timebantur.</p>
+<div class="main">
+    <h1 class="text-center mb-4">Trading App</h1>
+    <p class="text-intro">Et interdum acciderat, ut siquid in penetrali secreto nullo citerioris vitae ministro praesente 
+        paterfamilias uxori susurrasset in aurem, velut Amphiarao referente aut Marcio, quondam vatibus inclitis, 
+        postridie disceret imperator. ideoque etiam parietes arcanorum soli conscii timebantur.</p>
+    
+    <h3 class="mt-large text-center"> Choose a company</h3>
+    
+    <div class="prediction_bloc">
+        <div class="select_bloc">
+            <select class="custom-select" id="select-stock" name="companies">
+                {% for symbol, company in companies %}
+                    <option value="{{ symbol }}">{{ company }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-<h3> Choose a company</h3>
-<select id="select-stock" name="companies">
-    {% for symbol, company in companies %}
-        <option value="{{ symbol }}">{{ company }}</option>
-    {% endfor %}
-</select>
+        <div class="predictions">
+            <button class="btn btn-light" id="predict-stock" name="predict">Predict</button>
+        </div>
+    </div>
 
-<div id="time_series" style="width:1000px; height:500px;"></div>
+    <div class="text-center mt-3">
+        <p id="result"></p>
+    </div>
 
-<div>
-    <button id="predict-stock" name="predict">Predict</button>
+    <div class="graph_bloc">
+        <div id="time_series"></div>
+    </div>
+    
+    
+
 </div>
 
-<form method="POST" action="{{ url_for('predict') }}">
-    <div class="form-group">
-      <label for="nom_user">Nom</label>
-      <input type="text" class="form-control" id="nom_user" name="nom_user" placeholder="John Doe">
-    </div>
-    <div class="form-group">
-        <textarea class="form-control" name="comment" cols="30" rows="6" placeholder="Bonjour Hotel Simplon, "></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary s-btn">Submit</button>
-</form> 
-
 {% endblock %}
-
-{% block project_title %} {{ titre }} {% endblock %}
 
 {% block footer %}
     {{ super() }}
@@ -71,6 +74,18 @@
           dates = JSON.parse(data.dates)
           prices = JSON.parse(data.prices)
           plot_graph(time_series, dates, prices, symb)
+        });
+        return false;
+      });
+
+      $('#predict-stock').bind('click', function() {
+        var symb = $( "#select-stock option:selected").val()
+
+        $.getJSON($SCRIPT_ROOT + '/predict', {
+          symbol: symb
+        }, function(data) {
+          console.log(data.result)
+          $("#result").text(data.result)
         });
         return false;
       });

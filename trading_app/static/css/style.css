@@ -1,0 +1,36 @@
+.main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 5em 2em;
+}
+
+.text-intro {
+  width: 60%;
+  margin: auto;
+  text-align: center;
+}
+
+.select_bloc {
+  margin: 0;
+  width: 500px;
+}
+
+.mt-large {
+  margin-top: 2em;
+}
+
+#time_series {
+  margin: auto;
+  width: 1000px;
+  height: 500px;
+}
+
+.prediction_bloc {
+  display: flex;
+  width: 80%;
+  margin: auto;
+  padding-top: 2em;
+  justify-content: center;
+}
+
+/*# sourceMappingURL=style.css.map */
