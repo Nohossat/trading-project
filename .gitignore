@@ -1,5 +1,10 @@
 .vscode
 .DS_Store
 config.py
+data_wrangling/config.py
+data_wrangling/.ipynb_checkpoints
+data_wrangling/__pycache__
 venv
 __pycache__
+.ipynb_checkpoints
+models
