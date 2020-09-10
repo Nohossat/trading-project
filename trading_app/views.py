@@ -101,5 +101,5 @@ def predict():
         result = "You should sell, it is going down tomorrow"
     else:
         result = "You should do nothing, it is not moving much"
-
-    return json.dumps({"result" : result})
+    
+    return json.dumps({"result" : result, "price" : str(prediction[0][0])})
