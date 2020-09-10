@@ -6,15 +6,20 @@ The main goal of our app is to predict if a stock price is about to increase or 
 
 ### Database
 
-Since we are dealing with Time Series, we will opt for a **Posgresql** database which will be more efficient to query and deal with the data
+Since we are dealing with Time Series, we will opt for a **Posgresql** database which will be more efficient to query and deal with the data.
+
+### Preprocessing
+
+We did an Exploratory Data Analysis in the **data_wrangling/preparation_dataset.ipynb**. 
+We use the **MSFT** stock to understand how to prepare the dataset for an LSTM model.
 
 ### Machine Learning
 
-We will use Python.
+We compared a 1-hidden-layer LSTM and a 1-hidden-layer Bidirectional LSTM. We observe the results are slightly better with a simple LSTM so we trained and saved the simple model for each stock.
 
 ### Web Framework
 
-We will use Flask to present our results and let the user interact with the predictions.
+We use Flask to present the different stocks and enable the user to get some advice about buying or selling the stocks of his/her choice.
 
 ## Install
 
@@ -50,12 +55,7 @@ pgpwd = "XXXXXX"
 
 ### Setting up Flask
 
-TBD
-
-## Remarks
-
-Several questions are to be taken into account :
-- Which type of data is useful in this project ?
-- Which threshold will we use in order to advise the user into buying/selling stock ?
-- How to plot the real-time values of the companies' stocks in our application ?
-- Which UI framework will we choose to present the predictions ?
+```shell
+export FLASK_APP=trading_app
+flask run
+```

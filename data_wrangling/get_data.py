@@ -170,8 +170,6 @@ if __name__ == '__main__':
     }
     get_companies_info(db, params_url, save_company_info)
 
-    # update prices with latest values
-
     db.close_connection()
     
     
