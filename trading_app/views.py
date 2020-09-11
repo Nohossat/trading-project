@@ -50,8 +50,6 @@ def update_db():
     db.close_connection()
 
 def get_companies():
-    # retry update time series tomorrow
-    # update_db()
     db = Database()
     companies = db.get_companies()
     db.close_connection()

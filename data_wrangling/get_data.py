@@ -6,7 +6,7 @@ from data_wrangling.db import Database
 from datetime import datetime, date
 import os
 
-def create_url(params):
+def create_url(params, url):
     """
     Create url 
 
@@ -18,16 +18,11 @@ def create_url(params):
     ===========
     url : String
     """
-    # get api key
-    API_KEY = config.av_key
 
-    url = "https://www.alphavantage.co/query?"
-    
-    for key, value in params.items():
-        url += f"{key}={value}&"
-        
-    url += f"apikey={API_KEY}"
-
+    for idx, (key, value) in enumerate(params.items()):
+        url += f"{key}={value}"
+        if idx < len(params) - 1:
+            url += "&"
     return url
 
 def fetch_results(url):
@@ -139,20 +134,90 @@ def get_companies_info(db, params, save_fct):
     companies_json = os.path.join(CURRENT_DIR, "data/dow_jones_companies.json")
     companies = json.load(open(companies_json))
 
+    url = "https://www.alphavantage.co/query?"
+
     # fetch results
     for symbol in companies:
-        params["symbol"] = symbol # we add the symbol to the paramaters to query the API
-        url = create_url(params)
+        params["symbol"] = symbol
+        url = create_url(params, url)
         company_info = fetch_results(url)
 
         # max 5 API calls / min, the 6th value will have the following warning
         warning = "Thank you for using Alpha Vantage! Our standard API call frequency is 5 calls per minute and 500 calls per day. Please visit https://www.alphavantage.co/premium/ if you would like to target a higher API call frequency."
         if warning in company_info.values():
-            print("idle")
             time.sleep(70)
             company_info = fetch_results(url)
         
         save_fct(symbol, company_info, db)
+
+def get_company_news(db, params):
+    """
+    Fetch stock information from Stock News Api. 
+    We will query the 30 last days for each company
+
+    Parameters
+    ===========
+    db : database to save the information into
+    paramas : parameters of the api url
+
+    Return
+    ========
+    None
+    """
+    # get equity symbols
+    CURRENT_DIR = os.path.dirname(__file__)
+    companies_json = os.path.join(CURRENT_DIR, "data/dow_jones_companies.json")
+    companies = json.load(open(companies_json))
+
+    # fetch results
+    for symbol in companies:
+        params["tickers"] = symbol
+        url = "https://stocknewsapi.com/api/v1?"
+        url = create_url(params, url)
+
+        company_news = fetch_results(url)
+
+        if not isinstance(company_news, dict) or len(company_news) == 0:
+            continue
+
+        for news in company_news["data"]:
+            # article insertion - get resulting id
+            article = [news["source_name"], news["title"], news["text"], news["date"], news["sentiment"]]
+            news_id = db.insertArticle(article)
+
+            if news_id is not None:
+                news_id = news_id[0] 
+
+            # get tickers id
+            symbols_id = []
+
+            for symbol in news["tickers"]:
+                symbol_id = db.getSymbolsId(symbol)
+
+                if symbol_id is not None:
+                    symbols_id.append(symbol_id[0])
+
+            # add to join table news_by_symbol
+            db.addIdsArticles(news_id, symbols_id)
+
+def insertSymbolsToDB(db):
+    """
+    We select the equities from a JSON file to insert their symbols into a Postgresql database.
+
+    Parameters
+    ===========
+    db : database object which will be used to save the data
+
+    Return
+    ===========
+    None.
+    """
+    # get equity symbols
+    CURRENT_DIR = os.path.dirname(__file__)
+    companies_json = os.path.join(CURRENT_DIR, "data/dow_jones_companies.json")
+    companies = json.load(open(companies_json))
+    db.insertSymbols(companies.keys())
+
 
 if __name__ == '__main__':
     db = Database()
@@ -160,15 +225,27 @@ if __name__ == '__main__':
     # get stock prices time series from 20 years
     params_url = {
         "function" : "TIME_SERIES_DAILY_ADJUSTED",
-        "outputsize" : "full" 
+        "outputsize" : "full" ,
+        "apikey" : config.av_key
     }
-    get_companies_info(db, params_url, save_time_series)
+    # get_companies_info(db, params_url, save_time_series)
 
-    # get company info + news
+    # get company info
     params_url = {
-        "function" : "OVERVIEW"
+        "function" : "OVERVIEW",
+        "apikey" : config.av_key
     }
-    get_companies_info(db, params_url, save_company_info)
+    # get_companies_info(db, params_url, save_company_info)
+
+    params = {
+        "type" : "article",
+        "date" : "03152019-05082020",
+        "items" : 50,
+        "token" : config.stock_news
+    }
+    
+    # get company news
+    get_company_news(db, params)
 
     db.close_connection()
     
