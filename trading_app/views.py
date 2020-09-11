@@ -51,7 +51,7 @@ def update_db():
 
 def get_companies():
     # retry update time series tomorrow
-    update_db()
+    # update_db()
     db = Database()
     companies = db.get_companies()
     db.close_connection()
