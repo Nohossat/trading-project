@@ -182,7 +182,7 @@ def get_company_news(db, params):
 
         for news in company_news["data"]:
             # article insertion - get resulting id
-            article = [news["source_name"], news["title"], news["text"], news["date"], news["sentiment"]]
+            article = [news["source_name"], news["title"], news["text"], news["date"], news["sentiment"], news["news_url"]]
             news_id = db.insertArticle(article)
 
             if news_id is not None:

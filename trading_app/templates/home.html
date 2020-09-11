@@ -1,156 +1,198 @@
 {% extends "layout.html" %}
 
-{% block title %} {{ titre }} {% endblock %}
-
 {% block head %} 
-   {{ super() }}
+  {{ super() }}
 {% endblock %}
 
 {% block content %}
 
 <div class="main">
-    <h1 class="text-center mb-4">Trading App</h1>
-    <p class="text-intro">Et interdum acciderat, ut siquid in penetrali secreto nullo citerioris vitae ministro praesente 
-        paterfamilias uxori susurrasset in aurem, velut Amphiarao referente aut Marcio, quondam vatibus inclitis, 
-        postridie disceret imperator. ideoque etiam parietes arcanorum soli conscii timebantur.</p>
-    
-    <h3 class="mt-large text-center"> Choose a company</h3>
-    <p class="text-intro">A quondam vatibus inclitis, 
-        postridie disceret imperator. ideoque etiam parietes arcanorum soli conscii timebantur.</p>
+  <div class="sidebar">
+    <div>
+      <h3 class="text-center mt-5"> Choose a company</h3>
+    <p class="text-intro"> Please select a stock you want to invest in. </p>
 
-    <div class="prediction_bloc">
-        <div class="select_bloc">
-            <select class="custom-select" id="select-stock" name="companies">
-                {% for symbol, company in companies %}
-                    <option value="{{ symbol }}">{{ company }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="predictions">
-            <button class="btn btn-light" id="predict-stock" name="predict">Predict</button>
-        </div>
+    <div class="input-group mb-3 mt-4">
+      <select class="custom-select" id="select-stock" name="companies">
+        {% for symbol, company in companies.items() %}
+            <option value="{{ symbol }}">{{ company }}</option>
+        {% endfor %}
+      </select>
+      <div class="input-group-append">
+        <button class="btn btn-predict" id="predict-stock" name="predict">Predict</button>
+      </div>
     </div>
 
-    <div class="text-center mt-3">
+    <div class="text-center mt-5">
         <p>Current price : <span id="current_price"></span></p>
         <p id="result"></p>
         <p id="predict-price"></p>
+        <div class="loading">
+          <img src="{{ url_for('static', filename='img/loading.gif')}}" alt="">
+        </div>
     </div>
 
+    <h3 class="mb-4 news_title">{{ companies[symbol] }} News</h3>
+    <div class="news">
+      {% for article in news %}
+        <div class="news_article">
+          <h4 class="article_title">
+            {{ article[2] }}
+          </h4>
+          <p class="article_summary">
+            {{ article[3] }}
+            <span class="article_sentiment"> 
+              <strong>Sentiment</strong> : 
+              {{ article[5] }}
+            </span>
+            <span class="article_date">
+              Date : {{ article[4] }}
+            </span>
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  </div>
+  <div class="article">
+    <h1 class="text-center mb-4">Trading App</h1>
+
+    <div class="company_description">
+      <h3>
+      </h3>
+      <p>
+      </p>
+    </div>
+    
     <div class="graph_bloc">
         <div id="time_series"></div>
     </div>
-    
+  </div>
 </div>
+  
 
 {% endblock %}
 
 {% block footer %}
-    {{ super() }}
+  {{ super() }}
 {% endblock %}
 
 {% block graph %}
 <script>
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
-    time_series = document.getElementById('time_series')
+  time_series = document.getElementById('time_series')
 
-    {% autoescape false %}
-      var prices = {{ prices }}
-      var dates = {{ dates }}
-    {% endautoescape %}
+  {% autoescape false %}
+    var prices = {{ prices }}
+    var dates = {{ dates }}
+  {% endautoescape %}
 
-    // print default plot
-    plot_graph(time_series, dates, prices, "{{ symbol }}")
-    $("#current_price").text(prices[prices.length-1] + "$")
+  // print default plot
+  plot_graph(time_series, dates, prices, "{{ companies[symbol] }}")
+  $("#current_price").text(prices[prices.length-1].toFixed(2) + "$")
+  $(".company_description h3").text("{{ companies[symbol] }}")
+  $(".company_description p").text("{{ company_description }}")
 
-    // AJAX - reload graph when changing stock
-    $(function() {
-      $('#select-stock').bind('change', function() {
-        var symb = $( "#select-stock option:selected").val()
-        $("#result").text("")
-        $("#predict-price").text("")
-        $("#current_price").text("")
-        $.getJSON($SCRIPT_ROOT + '/_reload_time_serie', {
-          symbol: symb
-        }, function(data) {
-          // plot
-          dates = JSON.parse(data.dates)
-          prices = JSON.parse(data.prices)
-          $("#current_price").text(prices[prices.length-1] + "$")
-          plot_graph(time_series, dates, prices, symb)
-        });
-        return false;
+  // AJAX - reload graph when changing stock
+  $(function() {
+    $('#select-stock').bind('change', function() {
+      var symb = $( "#select-stock option:selected").val()
+      $("#result").text("")
+      $("#predict-price").text("")
+      $("#current_price").text("")
+
+      $.getJSON($SCRIPT_ROOT + '/reload_time_serie', {
+        symbol: symb
+      }, function(data) {
+        // plot
+        dates = JSON.parse(data.dates)
+        prices = JSON.parse(data.prices)
+        company_name = data.company_name
+        news = JSON.parse(data.news)
+        company_description = JSON.parse(data.company_description)
+
+        $(".company_description h3").text(company_name)
+        $(".company_description p").text(company_description)
+        $("#current_price").text(prices[prices.length-1].toFixed(2) + "$")
+        plot_graph(time_series, dates, prices, company_name)
       });
-
-      $('#predict-stock').bind('click', function() {
-        var symb = $( "#select-stock option:selected").val()
-        $("#result").text("")
-        $("#predict-price").text("")
-        $.getJSON($SCRIPT_ROOT + '/predict', {
-          symbol: symb
-        }, function(data) {
-          $("#result").text(data.result)
-          $("#predict-price").text("Predicted price : " + data.price + "$")
-        });
-        return false;
-      });
+      return false;
     });
-    // END AJAX
 
-    function plot_graph(tag, dates, prices, symbol) {
-      var trace = {
-        x: dates,
-        y: prices,
-        mode: 'lines',
-        line: {
-            color: 'rgb(155, 106, 108)',
-            width: 2
-        },
-        name : symbol
+    $('#predict-stock').bind('click', function() {
+      var symb = $( "#select-stock option:selected").val()
+      $("#result").text("")
+      $("#predict-price").text("")
+      $(".loading img").show()
+      $(".loading").css({ "height": "100px"})
+      $.getJSON($SCRIPT_ROOT + '/predict', {
+        symbol: symb
+      }, function(data) {
+        $(".loading img").hide()
+        $(".loading").css({ "height": "50px"})
+        $("#result").text(data.result)
+        $("#predict-price").text("Predicted price : " + parseFloat(data.price).toFixed(2) + "$")
+      });
+      return false;
+    });
+  });
+  // END AJAX
+
+  function plot_graph(tag, dates, prices, symbol) {
+    var trace = {
+      x: dates,
+      y: prices,
+      mode: 'lines',
+      line: {
+          color: '#5A5D87',
+          width: 2
+      },
+      name : symbol
+  };
+
+    var data = [trace];
+
+    var layout = {
+      title: {
+          text:'Stock Price for ' + symbol,
+          font: {
+              family: 'inherit',
+              size: 22,
+              color : "#383B53"
+          },
+          xref: 'paper',
+          x: 0.05,
+      },
+      xaxis: {
+          title: {
+              text: 'Time',
+              font: {
+                  family: 'inherit',
+                  size: 15,
+                  color: '#7f7f7f'
+              }
+          },
+      },
+      yaxis: {
+          title: {
+              text: 'Price',
+              font: {
+                  family: 'inherit',
+                  size: 15,
+                  color: '#7f7f7f'
+              }
+          }
+      },
+      showlegend: true,
+      legend: {
+        x: 1,
+        xanchor: 'right',
+        y: 1
+      }
     };
-
-      var data = [trace];
-
-      var layout = {
-        title: {
-            text:'Stock Price for ' + symbol,
-            font: {
-            family: 'inherit',
-                size: 24
-            },
-            xref: 'paper',
-            x: 0.05,
-        },
-        xaxis: {
-            title: {
-                text: 'Time',
-                font: {
-                    family: 'inherit',
-                    size: 15,
-                    color: '#7f7f7f'
-                }
-            },
-        },
-        yaxis: {
-            title: {
-                text: 'Price',
-                font: {
-                    family: 'inherit',
-                    size: 15,
-                    color: '#7f7f7f'
-                }
-            }
-        },
-        showlegend: true,
-        legend: {
-          x: 1,
-          xanchor: 'right',
-          y: 1
-        }
-      };
-      Plotly.newPlot(tag, data, layout);
-    }
-    </script>
+    Plotly.newPlot(tag, data, layout);
+  }
+  </script>
 {% endblock %}

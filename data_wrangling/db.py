@@ -18,6 +18,36 @@ class Database():
         """)
         return query.fetchall()[0][0]
 
+    def getArticlesbyStock(self, symbol):
+        query = self.connection.execute("""
+                SELECT id FROM symbols
+                WHERE symbol = (%s)
+            """, symbol)
+
+        result = query.fetchone()
+
+        if result is not None:
+            # get symbol if in the database
+            symbol_id = result[0]
+
+            # get news_id linked to the symbol
+            query = self.connection.execute(""" 
+                SELECT news_id FROM news_by_symbol 
+                WHERE symbol_id = (%s);
+            """, symbol_id)
+            news_ids = query.fetchall()
+            news_ids = tuple([str(n_id[0]) for n_id in news_ids])
+
+            # get the content for each news_id
+            query = self.connection.execute(f"""
+                SELECT source_name, title, texte, publish_date, sentiment FROM companies_news
+                WHERE id IN {news_ids};
+            """)
+
+            return query.fetchall()
+        else :
+            return False
+        
     def insertSymbols(self, symbols):
         for symbol in symbols:
             query = self.connection.execute("""
@@ -27,8 +57,8 @@ class Database():
 
     def insertArticle(self, article):
         query = self.connection.execute("""
-                INSERT INTO companies_news(source_name, title, texte, publish_date, sentiment)
-                VALUES (%s, %s, %s, %s, %s) 
+                INSERT INTO companies_news(source_name, title, texte, publish_date, sentiment, article_url)
+                VALUES (%s, %s, %s, %s, %s, %s) 
                 RETURNING id
             """, article)
         
@@ -62,6 +92,14 @@ class Database():
             LEFT JOIN companies ON companies.symbol = companies_prices.symbol;
         """)
         return query.fetchall()
+
+    def getCompanyDescription(self, symbol):
+        query = self.connection.execute("""
+            SELECT company_description
+            FROM companies
+            WHERE symbol = (%s)
+        """, symbol)
+        return query.fetchone()
 
     def getCompanyStock(self, symbol):
         query = self.connection.execute("""

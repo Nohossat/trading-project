@@ -53,25 +53,54 @@ def get_companies():
     db = Database()
     companies = db.get_companies()
     db.close_connection()
-    return companies
+    companies_dict = { key : value for key, value in companies }
+    return companies_dict
+
+def get_company_news(symbol):
+    db = Database()
+    articles = db.getArticlesbyStock(symbol)
+    db.close_connection()
+    return articles
+
+def get_company_description(symbol):
+    db = Database()
+    description = db.getCompanyDescription(symbol)[0]
+    db.close_connection()
+    return description
 
 @app.route('/')
-def index(title="Trading App"):
+def index():
     companies = get_companies()
-    symbol = companies[0][0]
+    symbol = list(companies.keys())[0]
     dates, avg_prices = get_time_series(symbol)
+    news = get_company_news(symbol)
+    company_description = get_company_description(symbol)
     
-    return render_template('home.html', title=title, 
-                                        companies=companies, 
+    return render_template('home.html', companies=companies, 
                                         dates = dates,
                                         prices = avg_prices,
-                                        symbol = symbol)
+                                        symbol = symbol,
+                                        news = news,
+                                        company_description = company_description)
 
-@app.route('/_reload_time_serie')
+@app.route('/reload_time_serie')
 def reload_time_serie():
     symbol = request.args.get('symbol', 0, type=str)
     dates, prices = get_time_series(symbol)
-    return json.dumps({"dates" : dates, "prices" : prices})
+    companies = get_companies()
+    company_name = companies[symbol]
+    news = [list(article) for article in get_company_news(symbol)]
+    company_description = get_company_description(symbol)
+
+    summary = company_description.split('.')[:5]
+    summary = json.dumps('.'.join(summary) + '...')
+
+    for article in news:
+        date = article[3]
+        article[3] = f"{date.year}-{date.month}-{date.day}"
+    news = json.dumps(news)
+
+    return json.dumps({"dates" : dates, "prices" : prices, "company_name" : company_name, "company_description" : summary, "news" : news})
 
 @app.route('/predict')
 def predict():
