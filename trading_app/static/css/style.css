@@ -8,14 +8,19 @@ body {
 }
 
 .sidebar {
-  width: 500px;
+  width: 30%;
   padding: 5em 3em;
   background-color: #383B53;
   color: #fff;
 }
 
+@media screen and (min-width: 1200px) {
+  .sidebar {
+    width: 25%;
+  }
+}
 .article {
-  width: 100%;
+  width: 70%;
   padding: 6em 3em 4em;
 }
 .article .company_description {
@@ -34,6 +39,11 @@ body {
   height: 600px;
 }
 
+@media screen and (min-width: 1200px) {
+  .article {
+    width: 75%;
+  }
+}
 .news_title {
   color: #5A5D87;
   font-size: 1.8em;
@@ -48,6 +58,9 @@ body {
 }
 .news h4.article_title {
   font-size: 1.2em;
+}
+.news .article_sentiment {
+  margin-top: 0.5em;
 }
 .news .article_sentiment, .news .article_date {
   display: block;

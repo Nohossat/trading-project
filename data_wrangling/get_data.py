@@ -218,7 +218,26 @@ def insertSymbolsToDB(db):
     companies = json.load(open(companies_json))
     db.insertSymbols(companies.keys())
 
+def update_db():
+    """
+    We compare the date of the last entry in our database with the current date, 
+    if they are different we are going to update the database with new values
+    """
+    db = Database()
+    last_day = db.get_last_record_day()
+    format_str = "%Y-%m-%d"
+    now = datetime.now()
 
+    if last_day.strftime(format_str) < now.strftime(format_str):
+        print("starting update")
+        params = {
+            "function" : "TIME_SERIES_DAILY_ADJUSTED",
+            "outputsize" : "compact" 
+        }
+        get_companies_info(db, params, save_time_series_update)
+        print("end update")
+
+    db.close_connection()
 if __name__ == '__main__':
     db = Database()
 

@@ -34,19 +34,20 @@
 
     <h3 class="mb-4 news_title">{{ companies[symbol] }} News</h3>
     <div class="news">
+      
       {% for article in news %}
         <div class="news_article">
           <h4 class="article_title">
-            {{ article[2] }}
+            {{ article[1] }}
           </h4>
           <p class="article_summary">
-            {{ article[3] }}
+            {{ article[2] }}
             <span class="article_sentiment"> 
               <strong>Sentiment</strong> : 
-              {{ article[5] }}
+              {{ article[4] }}
             </span>
             <span class="article_date">
-              Date : {{ article[4] }}
+              Date : {{ article[3] }}
             </span>
           </p>
         </div>
@@ -110,12 +111,13 @@
         dates = JSON.parse(data.dates)
         prices = JSON.parse(data.prices)
         company_name = data.company_name
-        news = JSON.parse(data.news)
         company_description = JSON.parse(data.company_description)
 
         $(".company_description h3").text(company_name)
         $(".company_description p").text(company_description)
         $("#current_price").text(prices[prices.length-1].toFixed(2) + "$")
+        $(".news_title").text(company_name + " News")
+        $(".news").html(data.news)
         plot_graph(time_series, dates, prices, company_name)
       });
       return false;
@@ -139,6 +141,10 @@
     });
   });
   // END AJAX
+
+  function createBlocNews() {
+
+  }
 
   function plot_graph(tag, dates, prices, symbol) {
     var trace = {

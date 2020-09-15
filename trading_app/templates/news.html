@@ -1,0 +1,17 @@
+{% for article in news %}
+      <div class="news_article">
+        <h4 class="article_title">
+          {{ article[1] }}
+        </h4>
+        <p class="article_summary">
+          {{ article[2] }}
+          <span class="article_sentiment"> 
+            <strong>Sentiment</strong> : 
+            {{ article[4] }}
+          </span>
+          <span class="article_date">
+            Date : {{ article[3] }}
+          </span>
+        </p>
+      </div>
+    {% endfor %}

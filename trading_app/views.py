@@ -1,7 +1,8 @@
 # Flask
-from flask import Flask, url_for, request, render_template
+from flask import Flask, url_for, request, render_template, jsonify
 from trading_app import app
 from data_wrangling.db import Database
+from data_wrangling.sqlite_db import Database_SQLite
 import numpy as np
 import json
 from tensorflow import keras
@@ -9,16 +10,29 @@ from datetime import datetime
 from data_wrangling.get_data import get_companies_info, save_time_series_update
 
 
+# by default we will use the SQLite database for the Flask API, 
+# we also have a PostgreSQL implementation, more complete, withe functions used for data preprocessing
+db_sqlite = True
+
 def get_time_series(symbol):
-    db = Database()
+    if db_sqlite:
+        db = Database_SQLite()
+    else :
+        db = Database()
+    
     data = db.getCompanyStock(symbol)
-    db.close_connection()
+
+    if not db_sqlite:
+        db.close_connection()
 
     dates = []
     avg_prices = []
 
     for date, high, low in data:
-        date_str = f"{date.year}-{date.month}-{date.day}"
+        if db_sqlite:
+            date_str = date
+        else:
+            date_str = f"{date.year}-{date.month}-{date.day}"
         dates.append(date_str)
         avg_prices.append((high + low) / 2)
 
@@ -28,44 +42,43 @@ def get_time_series(symbol):
 
     return dates, avg_prices
 
-def update_db():
-    """
-    We compare the date of the last entry in our database with the current date, 
-    if they are different we are going to update the database with new values
-    """
-    db = Database()
-    last_day = db.get_last_record_day()
-    format_str = "%Y-%m-%d"
-    now = datetime.now()
-
-    if last_day.strftime(format_str) < now.strftime(format_str):
-        print("starting update")
-        params = {
-            "function" : "TIME_SERIES_DAILY_ADJUSTED",
-            "outputsize" : "compact" 
-        }
-        get_companies_info(db, params, save_time_series_update)
-        print("end update")
-
-    db.close_connection()
-
 def get_companies():
-    db = Database()
+    if db_sqlite:
+        db = Database_SQLite()
+    else :
+        db = Database()
+
     companies = db.get_companies()
-    db.close_connection()
+
+    if not db_sqlite:
+        db.close_connection()
+
     companies_dict = { key : value for key, value in companies }
     return companies_dict
 
 def get_company_news(symbol):
-    db = Database()
+    if db_sqlite:
+        db = Database_SQLite()
+    else :
+        db = Database()
+
     articles = db.getArticlesbyStock(symbol)
-    db.close_connection()
+    
+    if not db_sqlite:
+        db.close_connection()
+
     return articles
 
 def get_company_description(symbol):
-    db = Database()
+    if db_sqlite:
+        db = Database_SQLite()
+    else :
+        db = Database()
+
     description = db.getCompanyDescription(symbol)[0]
-    db.close_connection()
+    
+    if not db_sqlite:
+        db.close_connection()
     return description
 
 @app.route('/')
@@ -97,10 +110,11 @@ def reload_time_serie():
 
     for article in news:
         date = article[3]
-        article[3] = f"{date.year}-{date.month}-{date.day}"
-    news = json.dumps(news)
-
-    return json.dumps({"dates" : dates, "prices" : prices, "company_name" : company_name, "company_description" : summary, "news" : news})
+        if not db_sqlite:
+            article[3] = f"{date.year}-{date.month}-{date.day}"
+    # news = json.dumps(news)
+    return jsonify({"dates" : dates, "prices" : prices, "company_name" : company_name, "company_description" : summary, "news" : render_template('news.html', news=news)})
+    # return json.dumps({"dates" : dates, "prices" : prices, "company_name" : company_name, "company_description" : summary, "news" : news})
 
 @app.route('/predict')
 def predict():
