@@ -1,7 +1,7 @@
 # Flask
 from flask import Flask, url_for, request, render_template, jsonify
 from trading_app import app
-from data_wrangling.db import Database
+# from data_wrangling.db import Database - activate only if you want to use Postgresql db
 from data_wrangling.sqlite_db import Database_SQLite
 import numpy as np
 import json
