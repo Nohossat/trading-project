@@ -7,7 +7,6 @@ import numpy as np
 import json
 from tensorflow import keras
 from datetime import datetime
-from data_wrangling.get_data import get_companies_info, save_time_series_update
 
 
 # by default we will use the SQLite database for the Flask API, 
