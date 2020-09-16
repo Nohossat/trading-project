@@ -1,7 +1,7 @@
 """
 Database class to connect, disconnect, made some queries to a Postgresql database
 """
-from sqlalchemy import Table, MetaData, create_engine
+from sqlalchemy import create_engine
 import data_wrangling.config as config
 
 class Database():
