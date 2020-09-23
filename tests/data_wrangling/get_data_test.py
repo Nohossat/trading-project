@@ -1,4 +1,10 @@
 import pytest
+import sys
+import os
+
+data_wrangling_path = os.path.abspath(os.path.join(os.getcwd()))
+sys.path.append(data_wrangling_path)
+
 from data_wrangling.get_data import *
 import data_wrangling.config as config
 
