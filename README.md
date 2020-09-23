@@ -6,24 +6,23 @@ The main goal of our app is to predict if a stock price is about to increase or 
 
 The application is available [here](https://trading-app-simplon.herokuapp.com/). 
 
-## Stack
 
-### Database
+## Data collection 
 
-In local, we used a **Postgresql** database to collect the stock information but for deployment purposes, we imported all the information into a **SQLite** database. 
+We used the AlphaVantage API to collect the time series (daily) of each stock. For company news, we used the Stock News API. Locally, the data has been stored in a **Postgresql** database but for deployment purposes, we imported all the information into a **SQLite** database. 
 
 ### Preprocessing
 
-We did an Exploratory Data Analysis in the **data_wrangling/preparation_dataset.ipynb**. 
-We use the **MSFT** stock to understand how to prepare the dataset for an LSTM model.
+We did an Exploratory Data Analysis in the **data_wrangling/preparation_dataset.ipynb** notebook.
+We used the **MSFT** stock to understand how to prepare the dataset for an LSTM model.
 
 ### Machine Learning
 
-We compared a 1-hidden-layer LSTM and a 1-hidden-layer Bidirectional LSTM. We observe the results are slightly better with a simple LSTM so we trained and saved the simple model for each stock.
+We compared a 1-hidden-layer LSTM and a 1-hidden-layer Bidirectional LSTM. We observed the results are slightly better with a simple LSTM so we trained and saved the simple model for each stock.
 
 ### Web Framework
 
-We use Flask to present the different stocks and enable the user to get some advice about buying or selling the stocks of his/her choice.
+We used Flask to display the different stocks and gives the user the ability to get some predictions about the trend of each stock.
 
 ## Local install
 
